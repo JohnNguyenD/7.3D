@@ -1,24 +1,72 @@
-int inputPin = 2;               // choose the input pin (for PIR sensor)
-int pirState = LOW;             // we start, assuming no motion detected
+// This is first sensor
 
+if(digitalRead(Sense1) == HIGH){
+digitalWrite(LampIn, LOW); //Interior lamp ON
+if(lockLow){
+// Wait for transition
+lockLow = false;
+Serial.println("\n\n");
+Serial.print("Active");
+Serial.println(" ");
+Serial.println("\n\n");
+delay(50);
+}
+takeLowTime = true;
 
-void setup() {
-  pinMode(inputPin, INPUT);     // declare sensor as input
-  Serial.begin(9600);
+}
+// This is second sensor
+
+if (digitalRead(Sense2) == HIGH) {
+digitalWrite(LampOut, LOW); //Exterior Lamp ON
+if (lockLow) {
+// Wait for transition
+lockLow = false;
+Serial.println("\n\n");
+Serial.print("Active");
+Serial.println("\n\n");
+delay(50);
+}
+takeLowTime = true;
+
+}
+// This is the third sensors
+if (digitalRead(Sense3) == HIGH) {
+digitalWrite(LampOut, LOW); //Exterior Lamp ON
+if (lockLow) {
+// Wait for transition
+lockLow = false;
+Serial.println("\n\n");
+Serial.print("Active");
+Serial.println("\n\n");
+delay(50);
+}
+takeLowTime = true;
+
 }
 
-void loop(){
-      if (pirState == LOW) {
-      // we have just turned on
-      Serial.println("Motion detected!");
-      // We only want to print on the output change, not state
-      pirState = HIGH;
-    }
-  } else {    
-      if (pirState == HIGH){
-      // we have just turned of
-      Serial.println("Motion ended!");
-      // We only want to print on the output change, not state
-      pirState = LOW;
-    }
-  }
+if(digitalRead(SenseOut) == LOW){
+digitalWrite(LampOut, HIGH); //The relay turns off
+if(takeLowTime){
+lowIn = millis(); //save the time of the transition from high to LOW
+takeLowTime = false; //make sure this is only done at the start of a LOW phase
+}
+}
+//if the sensor is low for more than the given pause,
+//we assume that no more motion is going to happen
+if(!lockLow && millis() - lowIn > pause){
+//makes sure this block of code is only executed again after
+//a new motion sequence has been detected
+lockLow = true;
+Serial.println("\n\n");
+Serial.print("Outdoor Light OFF");
+Serial.println("\n\n");
+delay(50);
+}
+
+if(digitalRead(SenseIn) == LOW){
+digitalWrite(LampIn, HIGH); //The relay turns off
+if(takeLowTime){
+lowIn = millis(); //save the time of the transition from high to LOW
+takeLowTime = false; //make sure this is only done at the start of a LOW phase
+}
+}
